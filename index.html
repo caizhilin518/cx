@@ -1,0 +1,211 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>光华路小学 2026级新生分班查询系统</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Microsoft YaHei",Arial,sans-serif;background:#f0f4f8;min-height:100vh}
+.header{background:linear-gradient(135deg,#1a5276,#2980b9);color:#fff;padding:28px 40px;text-align:center}
+.header h1{font-size:26px;letter-spacing:2px;margin-bottom:6px}
+.header p{font-size:14px;opacity:.85}
+.wrap{max-width:520px;margin:32px auto;padding:0 20px}
+.stat-row{display:flex;gap:12px;margin-bottom:20px}
+.stat-card{flex:1;background:#fff;border-radius:10px;padding:14px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.stat-num{font-size:22px;font-weight:bold;color:#2980b9}
+.stat-label{font-size:12px;color:#888;margin-top:2px}
+.stat-total{background:linear-gradient(135deg,#1a5276,#2980b9);color:#fff}
+.stat-total .stat-num{color:#fff}
+.card{background:#fff;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,.1);overflow:hidden;margin-bottom:20px}
+.card-hd{background:#7f8c8d;color:#fff;padding:12px 20px;font-size:14px;font-weight:bold}
+.card-body{padding:24px 28px}
+.hint-box{background:#fef9e7;border:1px solid #f1c40f;border-radius:8px;padding:12px 16px;font-size:12px;color:#7d6608;margin-bottom:16px}
+.form-row{margin-bottom:16px}
+.form-row label{display:block;font-size:13px;color:#555;margin-bottom:6px;font-weight:bold}
+.form-row input{width:100%;padding:10px 14px;font-size:15px;border:1.5px solid #ddd;border-radius:8px;outline:none;transition:border-color .2s}
+.form-row input:focus{border-color:#2980b9}
+.query-btn{width:100%;padding:13px;font-size:16px;border:none;border-radius:8px;background:linear-gradient(135deg,#27ae60,#2ecc71);color:#fff;font-weight:bold;cursor:pointer;transition:opacity .2s}
+.query-btn:hover{opacity:.9}
+.query-btn:active{opacity:.85}
+.error-msg{display:none;color:#e74c3c;font-size:13px;margin-top:8px;text-align:center}
+.result-card{display:none;margin-top:16px;background:#fff;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,.1);overflow:hidden}
+.result-card.show{display:block}
+.result-hd{padding:14px 20px;color:#fff;font-size:15px;font-weight:bold;text-align:center}
+.c1 .result-hd{background:#3498db}.c2 .result-hd{background:#27ae60}.c3 .result-hd{background:#e74c3c}
+.result-body{padding:20px 28px}
+.result-row{display:flex;padding:10px 0;border-bottom:1px solid #f0f0f0;font-size:14px}
+.result-row:last-child{border-bottom:none}
+.result-label{color:#888;width:80px;flex-shrink:0}
+.result-value{color:#222;font-weight:bold}
+.cls-badge{display:inline-block;padding:6px 20px;border-radius:20px;font-size:18px;font-weight:bold;color:#fff;margin-top:4px}
+.c1 .cls-badge{background:#3498db}.c2 .cls-badge{background:#27ae60}.c3 .cls-badge{background:#e74c3c}
+.footer{text-align:center;padding:20px;font-size:12px;color:#aaa}
+</style></head><body>
+<div class="header"><h1>光华路小学 2026级新生分班查询</h1><p>2026-2027学年 · 均衡分班结果查询</p></div>
+<div class="wrap">
+<div class="card">
+<div class="card-hd">&#128269; 班级信息查询</div>
+<div class="card-body">
+<div class="form-row"><label>学生姓名</label><input type="text" id="nameInput" placeholder="请输入姓名" maxlength="20" autocomplete="off"></div>
+<div class="form-row"><label>身份证号</label><input type="text" id="idInput" placeholder="请输入18位身份证号" maxlength="20" autocomplete="off"></div>
+<button class="query-btn" id="queryBtn">&#128269; 查询班级</button>
+<p class="error-msg" id="errMsg"></p>
+</div></div>
+<div class="result-card" id="resultCard">
+<div class="result-hd" id="resultHd">查询结果</div>
+<div class="result-body" id="resultBody"></div>
+</div>
+</div>
+<div class="footer">光华路小学 · 2026-2027学年</div>
+<script>
+var STUDENTS = [
+  ['艾裕锦','男','421003201906152318','一年级(3)班'],
+  ['白乐天','女','61011320200315132X','一年级(1)班'],
+  ['鲍柏安','男','420102202008143738','一年级(3)班'],
+  ['蔡飏','男','440116201810231812','一年级(2)班'],
+  ['陈葭诺','女','420102201912062026','一年级(3)班'],
+  ['陈瑾妍','女','420102202006054723','一年级(3)班'],
+  ['陈沁桐','女','421221201909110045','一年级(1)班'],
+  ['陈汐玥','女','420116201911296267','一年级(3)班'],
+  ['陈亦辰','男','411025201910280159','一年级(3)班'],
+  ['陈妤桐','女','42010220200106202X','一年级(3)班'],
+  ['陈哲','男','360423202005312913','一年级(3)班'],
+  ['陈芷逸','女','420102202002052042','一年级(3)班'],
+  ['陈梓煜','男','420102201910192011','一年级(1)班'],
+  ['陈紫妍','女','420102201912302026','一年级(3)班'],
+  ['程洛汐','女','420102202007063744','一年级(3)班'],
+  ['程轶可','女','421182202001105547','一年级(3)班'],
+  ['崔艺喆','男','411426202008200612','一年级(1)班'],
+  ['党荦超','男','61010420200719833X','一年级(1)班'],
+  ['董珞言','女','610113202004220462','一年级(1)班'],
+  ['杜慕瑶','女','420102201910172029','一年级(2)班'],
+  ['杜问水','男','42052620200218243X','一年级(2)班'],
+  ['杜宇哲','男','420117202007016731','一年级(2)班'],
+  ['杜禹润','男','420102201910272011','一年级(3)班'],
+  ['杜禹泽','男','420102201910272038','一年级(3)班'],
+  ['樊瑾瑜','男','420102202002142013','一年级(2)班'],
+  ['方海瑞','男','420821201905241015','一年级(2)班'],
+  ['方统帅','男','420222201912183750','一年级(2)班'],
+  ['付松杰','男','421081202002041870','一年级(1)班'],
+  ['付煜烟','女','522322201910180047','一年级(1)班'],
+  ['龚弈初','女','420822201911144824','一年级(1)班'],
+  ['韩欣冉','女','630225202001150088','一年级(3)班'],
+  ['胡敬珩','男','420102201907221416','一年级(3)班'],
+  ['胡熠宸','男','420105202008282411','一年级(1)班'],
+  ['胡卓霖','男','421223202006020038','一年级(3)班'],
+  ['黄芊语','女','420116201911026224','一年级(3)班'],
+  ['金煜雪','女','420102202004222025','一年级(3)班'],
+  ['鞠天宇','男','420102202004102015','一年级(3)班'],
+  ['李博睿','男','341225202001301538','一年级(2)班'],
+  ['李佳玟','女','420102201912022024','一年级(2)班'],
+  ['李沁峪','女','411502202008080029','一年级(2)班'],
+  ['李若汐','女','420102202007312026','一年级(2)班'],
+  ['李淑蔓','女','410402201909050045','一年级(2)班'],
+  ['李舒玥','女','429006202001264244','一年级(2)班'],
+  ['李奕安','男','420102202004150316','一年级(2)班'],
+  ['李宇熙','男','420821201911114039','一年级(2)班'],
+  ['李泽桓','男','41040220190905007X','一年级(2)班'],
+  ['李仲易','男','420102202003272012','一年级(2)班'],
+  ['李倬峯','男','420111202008182338','一年级(2)班'],
+  ['刘崇阳','男','421081201910075318','一年级(1)班'],
+  ['刘书颜','女','421126202008242527','一年级(1)班'],
+  ['刘忆初','女','420116202001098346','一年级(1)班'],
+  ['柳士博','男','420102201909182019','一年级(1)班'],
+  ['卢正澔','男','420102201909102015','一年级(1)班'],
+  ['鲁一诺','男','420529202005052111','一年级(3)班'],
+  ['鲁奕烜','男','420102202003262017','一年级(1)班'],
+  ['骆开昕','男','420102202008191414','一年级(1)班'],
+  ['潘以煜','男','420102202001022036','一年级(2)班'],
+  ['彭熙宸','男','420205202008037016','一年级(2)班'],
+  ['漆景辰','男','42118120190906393X','一年级(2)班'],
+  ['钱艺彤','女','42092120200715442X','一年级(3)班'],
+  ['冉懿宁','男','420100201912177218','一年级(1)班'],
+  ['任心扬','女','420102201910144781','一年级(1)班'],
+  ['阮子煜','女','421122202002026342','一年级(3)班'],
+  ['史可心','女','420202201910182046','一年级(1)班'],
+  ['孙晨熙','男','420102202004241031','一年级(1)班'],
+  ['谈隽恺','男','420102201909192030','一年级(3)班'],
+  ['谭靖澄','男','511302202003090079','一年级(1)班'],
+  ['谭语欣','女','420102201909232020','一年级(3)班'],
+  ['汤听宇','男','360924201910261019','一年级(1)班'],
+  ['唐煜枫','男','421181202004202813','一年级(1)班'],
+  ['陶书辰','男','42010220200508201X','一年级(3)班'],
+  ['陶子桂','男','420102202005222019','一年级(3)班'],
+  ['万德睿','男','420103202001064910','一年级(1)班'],
+  ['汪沐烁','男','420112201910173016','一年级(2)班'],
+  ['汪苏宇','男','420102202002042012','一年级(2)班'],
+  ['王晨宇','男','420116201904150438','一年级(1)班'],
+  ['王恩灿','男','420116202008065934','一年级(3)班'],
+  ['王匡胤','男','420102201909042016','一年级(3)班'],
+  ['王一泽','男','420921202003084831','一年级(3)班'],
+  ['王易姝','女','420102202008062022','一年级(2)班'],
+  ['王奕可','女','421081202008043981','一年级(2)班'],
+  ['王禹诚','女','420683201909110045','一年级(2)班'],
+  ['王知许','女','411724202001210109','一年级(1)班'],
+  ['王子鑫','男','420102201911012019','一年级(3)班'],
+  ['文浩宇','男','','一年级(3)班'],
+  ['吴逸兴','男','420102201910052019','一年级(1)班'],
+  ['吴蕴涵','女','420922202007142820','一年级(1)班'],
+  ['肖艺豪','男','420102201909211414','一年级(3)班'],
+  ['熊智轩','男','360123202007250916','一年级(3)班'],
+  ['徐安炽','男','420102201909142033','一年级(1)班'],
+  ['徐婕曦儿','女','420103202001190423','一年级(2)班'],
+  ['徐翕闻','女','420106201912253223','一年级(1)班'],
+  ['徐奕辰','男','420102202005102017','一年级(2)班'],
+  ['许荣俊','男','42010220191012203X','一年级(3)班'],
+  ['杨涵悦','女','420102202001072025','一年级(2)班'],
+  ['杨浩辰','男','420102202005062035','一年级(2)班'],
+  ['杨佑泽','男','420116202002090813','一年级(2)班'],
+  ['杨语晨','女','431322202004170260','一年级(2)班'],
+  ['叶橙熹','女','420102202008022020','一年级(1)班'],
+  ['尹可为','男','420102202007261417','一年级(1)班'],
+  ['尹思源','女','420982201904116720','一年级(1)班'],
+  ['于和','男','420102202006191437','一年级(1)班'],
+  ['于之乐','男','420102202002082014','一年级(1)班'],
+  ['张俊云','男','420102202004204759','一年级(2)班'],
+  ['张鸾懿','女','420114201912121220','一年级(2)班'],
+  ['张念念','女','420102202003232029','一年级(2)班'],
+  ['张亦宸','男','420281202008136117','一年级(2)班'],
+  ['赵一一','女','420102202007022029','一年级(3)班'],
+  ['郑浩然','男','420921202004304816','一年级(3)班'],
+  ['周小川','男','420102202001082039','一年级(1)班'],
+  ['周禛安','女','420102201912232048','一年级(1)班'],
+  ['朱晗玮','女','420102202008032026','一年级(2)班'],
+  ['祝宇浩','男','42010220190319203X','一年级(3)班'],
+  ['邹辰祎','男','42010220200102201X','一年级(3)班'],
+  ['左子翼','男','420102202004112053','一年级(2)班']
+];
+var clsMap = {"一年级(1)班":1,"一年级(2)班":2,"一年级(3)班":3};
+
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+
+function doQuery(){
+  var name = document.getElementById("nameInput").value.replace(/\s/g,"");
+  var id = document.getElementById("idInput").value.replace(/\s/g,"");
+  var err = document.getElementById("errMsg");
+  var rc = document.getElementById("resultCard");
+  err.style.display = "none";
+  rc.classList.remove("show");
+  if(!name || !id){err.textContent="请输入姓名和身份证号";err.style.display="block";return;}
+  for(var i=0;i<STUDENTS.length;i++){
+    var s = STUDENTS[i];
+    var idMatch = (s[2] === id);
+    if(s[0] === name && idMatch){
+      var ci = clsMap[s[3]] || 1;
+      var gn = s[1] === "男" ? "男生" : "女生";
+      var rb = document.getElementById("resultBody");
+      rb.innerHTML = 
+        '<div class="result-row"><span class="result-label">学生姓名</span><span class="result-value">'+esc(s[0])+'</span></div>'+
+        '<div class="result-row"><span class="result-label">性别</span><span class="result-value">'+gn+'</span></div>'+
+        '<div class="result-row"><span class="result-label">班级</span><span class="result-value"><span class="cls-badge c'+ci+'">'+esc(s[3])+'</span></span></div>';
+      rc.className = "result-card c"+ci+" show";
+      return;
+    }
+  }
+  err.textContent="查不到信息，请确认姓名和身份证号是否正确";
+  err.style.display="block";
+  rc.classList.remove("show");
+}
+
+document.getElementById("queryBtn").addEventListener("click", doQuery);
+document.getElementById("nameInput").addEventListener("keydown", function(e){if(e.key==="Enter")document.getElementById("idInput").focus();});
+document.getElementById("idInput").addEventListener("keydown", function(e){if(e.key==="Enter")doQuery();});
+</script></body></html>
